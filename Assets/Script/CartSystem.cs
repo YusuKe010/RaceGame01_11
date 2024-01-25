@@ -5,11 +5,11 @@ using UnityEngine;
 public class CartSystem : MonoBehaviour
 {
     /// <summary>
-    /// ‘®«ƒeƒNƒXƒ`ƒƒ
+    /// å±æ€§ãƒ†ã‚¯ã‚¹ãƒãƒ£
     /// </summary>
     [SerializeField] Texture2D _attributeTexture = null;
     /// <summary>
-    /// ŠÈˆÕƒVƒ“ƒOƒ‹ƒgƒ“
+    /// ç°¡æ˜“ã‚·ãƒ³ã‚°ãƒ«ãƒˆãƒ³
     /// </summary>
     static CartSystem _instance = null;
     static public CartSystem Instance => _instance;
@@ -19,11 +19,10 @@ public class CartSystem : MonoBehaviour
         Road,
         Dart,
         Wall,
-
         Max
     }
     /// <summary>
-    /// 1ƒ[ƒgƒ‹ˆÊ‚ÌƒsƒNƒZƒ‹”
+    /// ï¼‘ãƒ”ã‚¯ã‚»ãƒ«ã«ãŠã‘ã‚‹ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®å¤§ãã•
     /// </summary>
     const float PIXEL_SCALE = 10.0f;
     const float PIXEL_SCALEREV = 1.0f / PIXEL_SCALE;
@@ -32,11 +31,10 @@ public class CartSystem : MonoBehaviour
     {
         _instance = this;
     }
-
-    // Update is called once per frame
+    
     void Update()
     {
-
+        
     }
 
     public Attribute GetAttribute(Vector3 position)
@@ -56,15 +54,12 @@ public class CartSystem : MonoBehaviour
             else
                 return Attribute.Dart;
         }
-        Debug.Assert(false, "‚±‚±‚É‚Í—ˆ‚È‚¢‚Í‚¸");
+        Debug.Assert(false, "ã“ã“ã«ã¯æ¥ãªã„ã¯ãš");
         return Attribute.Max;
     }
-    /// <summary>
-    /// “–‚½‚è”»’è‚ÌÚ×
-    /// </summary>
-    /// <param name="position">XVŒã‚ÌˆÊ’u</param>
-    /// <param name="prevPosition">’¼‘O‚ÌˆÊ’u</param>
-    /// <param name="newPosition">•Ç‚©‚ç‚Ì‚ß‚è‚İ‚ª‰ğÁ‚³‚ê‚½ˆÊ’u</param>
+    /// <param name="position">è‡ªåˆ†ã®å ´æ‰€</param>
+    /// <param name="prevPosition">å‘¨ã‚Šã®å ´æ‰€</param>
+    /// <param name="newPosition">æ¬¡ã®å ´æ‰€</param>
     /// <returns></returns>
     public Vector3 GetAttributeDetail(Vector3 position, Vector3 prevPosition, out Vector3 newPosition)
     {
@@ -76,7 +71,7 @@ public class CartSystem : MonoBehaviour
             position += revVec;
             attr = GetAttribute(position);
         }
-        newPosition = position; //•Ç‚©‚ç‚Ì‚ß‚è‚İ‚ª‰ğÁ‚³‚ê‚½ˆÊ’u
+        newPosition = position; 
         position -= revVec;
         Attribute attrA = GetAttribute(position - new Vector3(PIXEL_SCALEREV, 0.0f, 0.0f));
         Attribute attrB = GetAttribute(position + new Vector3(PIXEL_SCALEREV, 0.0f, 0.0f));
@@ -84,12 +79,12 @@ public class CartSystem : MonoBehaviour
         {
             if (revVec.z < 0.0f)
             {
-                //‰º
+                //å¾Œã‚
                 return Vector3.back;
             }
             else
             {
-                //ã
+                //å‰
                 return Vector3.forward;
             }
         }
@@ -99,16 +94,16 @@ public class CartSystem : MonoBehaviour
         {
             if (revVec.x < 0.0f)
             {
-                //¶
+                //å·¦
                 return Vector3.left;
             }
             else
             {
-                //‰E
+                //å³
                 return Vector3.right;
             }
         }
-        Debug.Assert(false, "‚±‚±‚É‚Í—ˆ‚È‚¢‚Í‚¸");
+        Debug.Assert(false, "ã“ã“ã«ã¯æ¥ãªã„ã¯ãš");
         return Vector3.zero;
     }
 }

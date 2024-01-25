@@ -1,43 +1,56 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Cart : MonoBehaviour
 {
+    [SerializeField] private Text _goalText;
+    [SerializeField] private LayerMask _rapLayer;
+    [SerializeField] float _cartAccel = 10.0f;
+    [SerializeField] float _cartRotateSpeed = 0.0f;
+    float _cartSpeed = 0.0f;
+     float _cartRotate = 0.0f;
+     float _rotationAccel = 360.0f;
+    
     const float MAX_SPEED = 40.0f;
     const float MAX_ROTATION_SPEED = 360.0f / 3f;
 
-    float _cartSpeed = 0.0f;
-    float _cartAccel = 10.0f;
-    float _cartRotateSpeed = 0.0f;
-    float _cartRotate = 0.0f;
-    float _rotationAccel = 360.0f;
-
-    Vector3 _force = Vector3.zero; //ŠO•”‚©‚çŽó‚¯‚é—Í
+    private int _rapCount = 0;
+    public int RapCount => _rapCount;
+    Vector3 _force = Vector3.zero; //å¤–éƒ¨ã‹ã‚‰å—ã‘ã‚‹åŠ›
 
     void Start()
     {
+        Initialization();
+    }
+
+    void Initialization()
+    {
+        _rapCount = 0;
+        _goalText.enabled = false;
     }
 
 
     void Update()
     {
-        //Œ»ÝŽÔ‚ª‚¢‚éÀ•W‚Ì‘®«‚ðŽæ“¾
+        //ç¾åœ¨è»ŠãŒã„ã‚‹åº§æ¨™ã®å±žæ€§ã‚’å–å¾—
         CartSystem.Attribute attr = CartSystem.Instance.GetAttribute(transform.localPosition);
         Debug.Log($"{attr}");
-        //ƒXƒy[ƒXƒL[‚ª‰Ÿ‚³‚ê‚½‚ç‰Á‘¬
+        //ã‚¹ãƒšãƒ¼ã‚¹ã‚­ãƒ¼ãŒæŠ¼ã•ã‚ŒãŸã‚‰åŠ é€Ÿ
         if (Input.GetKey(KeyCode.Space))
         {
             _cartSpeed += _cartAccel * Time.deltaTime;
             _cartSpeed = Mathf.Clamp(_cartSpeed, 0.0f, MAX_SPEED);
         }
 
-        //’ïRiŒ¸‘¬j
+        //æŠµæŠ—ï¼ˆæ¸›é€Ÿï¼‰
         _cartSpeed *= (attr == CartSystem.Attribute.Dart) ? 0.98f : 0.99f;
         _force *= (attr == CartSystem.Attribute.Dart) ? 0.9f : 0.99f;
 
-        //¶‰E‚Ì–îˆóƒL[‚Åù‰ñ
+        //å·¦å³ã®çŸ¢å°ã‚­ãƒ¼ã§æ—‹å›ž
         float handle = Input.GetAxis("Horizontal");
 
         if (handle == 0) _cartRotateSpeed *= 0.9f;
@@ -46,24 +59,37 @@ public class Cart : MonoBehaviour
         _cartRotate += _cartRotateSpeed * Time.deltaTime;
         transform.localEulerAngles = new Vector3(0.0f, _cartRotate, 0.0f);
 
-        //ˆÚ“®
+        //ç§»å‹•
         Vector3 prevPosition = transform.localPosition;
         transform.localPosition += transform.forward * Time.deltaTime * _cartSpeed + _force * Time.deltaTime;
 
-        //•Ç‚Æ‚ÌÕ“Ë”»’è
+        //å£ã¨ã®è¡çªåˆ¤å®š
         attr = CartSystem.Instance.GetAttribute(transform.localPosition);
         if (attr == CartSystem.Attribute.Wall)
         {
-            //•Ç‚Æ‚ÌÚG“_‚ð‹‚ß‚é
+            //å£ã¨ã®æŽ¥è§¦ç‚¹ã‚’æ±‚ã‚ã‚‹
             Vector3 newPosition;
             Vector3 dir = CartSystem.Instance.GetAttributeDetail(transform.localPosition, prevPosition, out newPosition);
-            //•Ç‚©‚ç‚Ì”½”­‚ðŽó‚¯‚é
+            //å£ã‹ã‚‰ã®åç™ºã‚’å—ã‘ã‚‹
             _force = dir * 8.0f;
-            //ƒXƒs[ƒh‚ð—Ž‚Æ‚·
+            //ã‚¹ãƒ”ãƒ¼ãƒ‰ã‚’è½ã¨ã™
             _cartSpeed *= 0.75f;
 
-            //‚©‚×‚©‚ç‚Ì‚ß‚èž‚Ý‚ª‰ðÁ‚³‚ê‚½ˆÊ’u‚ÉXV
+            //ã‹ã¹ã‹ã‚‰ã®ã‚ã‚Šè¾¼ã¿ãŒè§£æ¶ˆã•ã‚ŒãŸä½ç½®ã«æ›´æ–°
             transform.localPosition = newPosition;
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Rap"))
+        {
+            _rapCount++;
+            if (_rapCount >= 3)
+            {
+                _goalText.enabled = true;
+                _goalText.text = "GOAL!!";
+            }
         }
     }
 }
