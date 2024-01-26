@@ -30,6 +30,7 @@ public class GameManager : MonoBehaviour
 
     void Initialization()
     {
+        gameObject.tag = "Lap";
         _gameMode = GameMode.BeforeStart;
         CountDown();
     }
