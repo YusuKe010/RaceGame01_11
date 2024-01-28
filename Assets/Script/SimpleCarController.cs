@@ -24,7 +24,7 @@ namespace Script
 		[SerializeField] private float _maxCartBrake = 10000.0f;
 		[SerializeField] private Ease _ease;
 		float _cartRotate = 0.0f;
-		float _rotationAccel = 360.0f;
+		float _rotationAccel = 360.0f / 3f;
 
 		const float MAX_SPEED = 40.0f;
 		const float MAX_ROTATION_SPEED = 360.0f / 3f;
@@ -44,6 +44,17 @@ namespace Script
 		private void Update()
 		{
 			float steering = maxSteeringAngle * Input.GetAxis("Horizontal");
+			
+			if (steering == 0)
+			{
+				_cartRotateSpeed *= 0.9f;
+			}
+			_cartRotateSpeed += _rotationAccel * steering * Time.deltaTime;
+			_cartRotateSpeed = Mathf.Clamp(_cartRotateSpeed, -MAX_ROTATION_SPEED, MAX_ROTATION_SPEED);
+			_cartRotate += _cartRotateSpeed * Time.deltaTime;
+			transform.localEulerAngles = new Vector3(0.0f, _cartRotate, 0.0f);
+
+			
 			foreach (AxleInfo axleInfo in axleInfos)
 			{
 				if (axleInfo.steering)
