@@ -14,6 +14,12 @@ namespace Script
 		public bool steering; // このホイールがハンドルの角度を反映しているかどうか
 	}
 
+	public enum CartStatus
+	{
+		Load,
+		Grass
+	}
+
 	public class SimpleCarController : MonoBehaviour
 	{
 		public List<AxleInfo> axleInfos;
@@ -23,17 +29,29 @@ namespace Script
 		[SerializeField] float _cartRotateSpeed = 0.0f;
 		[SerializeField] private float _maxCartBrake = 10000.0f;
 		[SerializeField] private Ease _ease;
+		[SerializeField] private GameObject[] _muffler;
+		[SerializeField] private GameObject _grass;
+		[SerializeField] private CartStatus _cartStatus = CartStatus.Load;
 		float _cartRotate = 0.0f;
-		float _rotationAccel = 360.0f / 3f;
+		float _rotationAccel = 360.0f;
 
 		const float MAX_SPEED = 40.0f;
-		const float MAX_ROTATION_SPEED = 360.0f / 3f;
+		const float MAX_ROTATION_SPEED = 360.0f / 6f;
 
 		private Tween[] _tweens = new Tween[4];
 
 		private void Start()
 		{
 			_rb = GetComponent<Rigidbody>();
+			Initialization();
+		}
+
+		void Initialization()
+		{
+			
+			_muffler[0].SetActive(true);
+			_muffler[1].SetActive(true);
+			_grass.SetActive(false);
 			foreach (AxleInfo axleInfo in axleInfos)
 			{
 				axleInfo.leftWheel.brakeTorque = .0f;
@@ -44,87 +62,24 @@ namespace Script
 		private void Update()
 		{
 			float steering = maxSteeringAngle * Input.GetAxis("Horizontal");
-			
-			if (steering == 0)
-			{
-				_cartRotateSpeed *= 0.9f;
-			}
-			_cartRotateSpeed += _rotationAccel * steering * Time.deltaTime;
-			_cartRotateSpeed = Mathf.Clamp(_cartRotateSpeed, -MAX_ROTATION_SPEED, MAX_ROTATION_SPEED);
-			_cartRotate += _cartRotateSpeed * Time.deltaTime;
-			transform.localEulerAngles = new Vector3(0.0f, _cartRotate, 0.0f);
 
-			
-			foreach (AxleInfo axleInfo in axleInfos)
-			{
-				if (axleInfo.steering)
-				{
-					axleInfo.leftWheel.steerAngle = steering;
-					axleInfo.rightWheel.steerAngle = steering;
-				}
-
-				if (axleInfo.motor)
-				{
-					if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
+			// switch (_gameMode)
+			// {
+			// 	case GameMode.BeforeStart:
+			// // 		break;
+			// 	case GameMode.InGame:
+			 		Accel(steering);
+			 		Carb(steering);
+					switch (_cartStatus)
 					{
-						_tweens[0].Kill();
-						_tweens[1].Kill();
-						_tweens[0] = DOTween.To(
-							() => axleInfo.leftWheel.motorTorque,
-							value => axleInfo.leftWheel.motorTorque = value,
-							maxMotorTorque, 3.0f).OnComplete(() => Debug.Log("加速終わり"));
-						_tweens[1] = DOTween.To(
-							() => axleInfo.rightWheel.motorTorque,
-							value => axleInfo.rightWheel.motorTorque = value,
-							maxMotorTorque, 3.0f);
+						case CartStatus.Load:
+							break;
+						case CartStatus.Grass:
+							break;
 					}
 
-					if (Input.GetKeyUp(KeyCode.W) || Input.GetKeyUp(KeyCode.UpArrow))
-					{
-						_tweens[0].Kill();
-						_tweens[1].Kill();
-						_tweens[0] = DOTween.To(
-							() => axleInfo.leftWheel.motorTorque,
-							value => axleInfo.leftWheel.motorTorque = value,
-							0, 1.5f).OnComplete(() => Debug.Log("トルク０"));
-						_tweens[1] = DOTween.To(
-							() => axleInfo.rightWheel.motorTorque,
-							value => axleInfo.rightWheel.motorTorque = value,
-							0, 1.5f);
-					}
-
-					if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
-					{
-						_tweens[2].Kill();
-						_tweens[3].Kill();
-						_tweens[2] = DOTween.To(
-							() => axleInfo.leftWheel.brakeTorque,
-							value => axleInfo.leftWheel.brakeTorque = value,
-							_maxCartBrake, .0f);
-						_tweens[3] = DOTween.To(
-							() => axleInfo.rightWheel.brakeTorque,
-							value => axleInfo.rightWheel.brakeTorque = value,
-							_maxCartBrake, .0f).OnComplete(() => Debug.Log("止まった"));
-					}
-
-					if (Input.GetKeyUp(KeyCode.S) || Input.GetKeyUp(KeyCode.DownArrow))
-					{
-						_tweens[2].Kill();
-						_tweens[3].Kill();
-						_tweens[2] = DOTween.To(
-							() => axleInfo.leftWheel.brakeTorque,
-							value => axleInfo.leftWheel.brakeTorque = value,
-							0.0f, 1.0f).OnComplete(() => Debug.Log("走れ"));
-						_tweens[3] = DOTween.To(
-							() => axleInfo.rightWheel.brakeTorque,
-							value => axleInfo.rightWheel.brakeTorque = value,
-							0.0f, 1.0f);
-					}
-				}
-
-				ApplyLocalPositionToVisuals(axleInfo.leftWheel);
-				ApplyLocalPositionToVisuals(axleInfo.rightWheel);
-			}
+					//break;
+			//}
 		}
 
 		// 対応する視覚的なホイールを見つけます
@@ -148,6 +103,115 @@ namespace Script
 
 		public void FixedUpdate()
 		{
+		}
+
+		private void OnCollisionEnter(Collision other)
+		{
+			if (other.collider.CompareTag("Load"))
+			{
+				Debug.Log("Load");
+				_cartStatus = CartStatus.Load; //CartStatus.Load
+				_muffler[0].SetActive(true);
+				_muffler[1].SetActive(true);
+				_grass.SetActive(false);
+			}
+			if (other.collider.CompareTag("Grass"))
+			{
+				Debug.Log("Grass");
+				_cartStatus = CartStatus.Grass; //CartStatus.Grass
+				_grass.SetActive(true);
+			}
+		}
+
+		private void OnTriggerEnter(Collider other)
+		{
+		}
+
+		void Accel(float steering)
+		{
+			foreach (AxleInfo axleInfo in axleInfos)
+			{
+				if (axleInfo.steering)
+				{
+					axleInfo.leftWheel.steerAngle = steering;
+					axleInfo.rightWheel.steerAngle = steering;
+				}
+
+				if (axleInfo.motor)
+				{
+					if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
+					{
+						_tweens[0].Kill();
+						_tweens[1].Kill();
+						_tweens[0] = DOTween.To(
+							() => axleInfo.leftWheel.motorTorque,
+							value => axleInfo.leftWheel.motorTorque = value,
+							maxMotorTorque, 3.0f);
+						_tweens[1] = DOTween.To(
+							() => axleInfo.rightWheel.motorTorque,
+							value => axleInfo.rightWheel.motorTorque = value,
+							maxMotorTorque, 3.0f);
+					}
+
+					if (Input.GetKeyUp(KeyCode.W) || Input.GetKeyUp(KeyCode.UpArrow))
+					{
+						_tweens[0].Kill();
+						_tweens[1].Kill();
+						_tweens[0] = DOTween.To(
+							() => axleInfo.leftWheel.motorTorque,
+							value => axleInfo.leftWheel.motorTorque = value,
+							0, 1.5f);
+						_tweens[1] = DOTween.To(
+							() => axleInfo.rightWheel.motorTorque,
+							value => axleInfo.rightWheel.motorTorque = value,
+							0, 1.5f);
+					}
+
+					if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
+					{
+						_tweens[2].Kill();
+						_tweens[3].Kill();
+						_tweens[2] = DOTween.To(
+							() => axleInfo.leftWheel.brakeTorque,
+							value => axleInfo.leftWheel.brakeTorque = value,
+							_maxCartBrake, .0f);
+						_tweens[3] = DOTween.To(
+							() => axleInfo.rightWheel.brakeTorque,
+							value => axleInfo.rightWheel.brakeTorque = value,
+							_maxCartBrake, .0f);
+					}
+
+					if (Input.GetKeyUp(KeyCode.S) || Input.GetKeyUp(KeyCode.DownArrow))
+					{
+						_tweens[2].Kill();
+						_tweens[3].Kill();
+						_tweens[2] = DOTween.To(
+							() => axleInfo.leftWheel.brakeTorque,
+							value => axleInfo.leftWheel.brakeTorque = value,
+							0.0f, 1.0f);
+						_tweens[3] = DOTween.To(
+							() => axleInfo.rightWheel.brakeTorque,
+							value => axleInfo.rightWheel.brakeTorque = value,
+							0.0f, 1.0f);
+					}
+				}
+
+				ApplyLocalPositionToVisuals(axleInfo.leftWheel);
+				ApplyLocalPositionToVisuals(axleInfo.rightWheel);
+			}
+		}
+
+		void Carb(float steering)
+		{
+			if (steering == 0)
+			{
+				_cartRotateSpeed *= 0.9f;
+			}
+
+			_cartRotateSpeed += _rotationAccel * steering * Time.deltaTime;
+			_cartRotateSpeed = Mathf.Clamp(_cartRotateSpeed, -MAX_ROTATION_SPEED, MAX_ROTATION_SPEED);
+			_cartRotate += _cartRotateSpeed * Time.deltaTime;
+			transform.localEulerAngles = new Vector3(0.0f, _cartRotate, 0.0f);
 		}
 	}
 }
