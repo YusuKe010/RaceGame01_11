@@ -8,6 +8,7 @@ TagManager:
   - Grass
   - Bump
   - Load
+  - Lap
   layers:
   - Default
   - TransparentFX

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Cysharp.Threading.Tasks;
 using Unity.VisualScripting;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public enum GameMode
@@ -17,11 +18,10 @@ public class GameManager : MonoBehaviour
 {
     private static GameManager _instance;
     public static GameManager Instance => _instance;
-
-    [SerializeField] private Text _timerText = null;
-    [SerializeField] Text _cuontDown = null;
-    private float _worldTimer = 0.0f;
-    private GameMode _gameMode = GameMode.BeforeStart;
+     [SerializeField]
+     Text _cuontDownText = null;
+    public GameMode _gameMode = GameMode.BeforeStart;
+    private SceneChanger _sceneChanger = new SceneChanger();
 
     void Start()
     {
@@ -30,8 +30,8 @@ public class GameManager : MonoBehaviour
 
     void Initialization()
     {
-        gameObject.tag = "Lap";
         _gameMode = GameMode.BeforeStart;
+        _cuontDownText.enabled = false;
         CountDown();
     }
 
@@ -42,7 +42,6 @@ public class GameManager : MonoBehaviour
             case GameMode.BeforeStart:
                 break;
             case GameMode.InGame:
-                _worldTimer += Time.deltaTime;
                 break;
             case GameMode.Ranking:
                 break;
@@ -53,23 +52,20 @@ public class GameManager : MonoBehaviour
     async void CountDown(float waiteTime = 3.0f)
     {
         await UniTask.Delay(TimeSpan.FromSeconds(waiteTime));
+        _cuontDownText.enabled = true;
+        _cuontDownText.text = "3";
         await UniTask.Delay(TimeSpan.FromSeconds(1.0f));
-        Debug.Log("3");
+        _cuontDownText.text = "2";
         await UniTask.Delay(TimeSpan.FromSeconds(1.0f));
-        Debug.Log("2");
+        _cuontDownText.text = "1";
         await UniTask.Delay(TimeSpan.FromSeconds(1.0f));
-        Debug.Log("1");
-        await UniTask.Delay(TimeSpan.FromSeconds(1.0f));
-        Debug.Log("START");
+        _cuontDownText.text = "START";
         _gameMode = GameMode.InGame;
+        await UniTask.Delay(TimeSpan.FromSeconds(1.0f));
+        _cuontDownText.enabled = false;
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player"))
-        {
-            Cart cart = other.GetComponent<Cart>();
-            
-        }
     }
 }
