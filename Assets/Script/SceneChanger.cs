@@ -40,14 +40,14 @@ public class SceneChanger : MonoBehaviour
 
     public void LoadScene(string name)
     {
-        Execute(name);
+        StartCoroutine( Execute(name));
     }
 
-     public async void Execute(string name)
+     IEnumerator Execute(string name)
     {
-        await FadeOut();
+        yield return FadeOut();
         SceneManager.LoadScene(name);
-        await FadeIn();
+        yield return FadeIn();
     }
 
     /// <summary>
@@ -61,6 +61,7 @@ public class SceneChanger : MonoBehaviour
             _fadePanel.DOFade(1.0f, 0.0f);
             yield return _fadePanel.DOFade(0.0f, duration).WaitForCompletion();
             _fadePanel.gameObject.SetActive(false);
+            Debug.Log("フェードイン完了");
         }
         else
         {
@@ -68,7 +69,6 @@ public class SceneChanger : MonoBehaviour
             yield break;
         }
 
-        Debug.Log("フェードイン完了");
     }
 
     /// <summary>
@@ -80,7 +80,10 @@ public class SceneChanger : MonoBehaviour
         if (_fadePanel != null)
         {
             _fadePanel.gameObject.SetActive(true);
+            _fadePanel.DOFade(0.0f, 0.0f);
             yield return _fadePanel.DOFade(1.0f, duration).WaitForCompletion();
+            _fadePanel.gameObject.SetActive(false);
+            Debug.Log("フェードアウト完了");
         }
         else
         {

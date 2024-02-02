@@ -184,14 +184,14 @@ namespace Script
 						_tweens[2] = DOTween.To(
 							() => axleInfo.leftWheel.brakeTorque,
 							value => axleInfo.leftWheel.brakeTorque = value,
-							_maxCartBrake, 5.0f);
+							_maxCartBrake, 0.0f);
 						_tweens[3] = DOTween.To(
 							() => axleInfo.rightWheel.brakeTorque,
 							value => axleInfo.rightWheel.brakeTorque = value,
-							_maxCartBrake , 5.0f);
+							_maxCartBrake , 0.0f);
 					}
 
-					if (Input.GetKeyUp(KeyCode.LeftShift) || Input.GetKeyUp(KeyCode.LeftShift))
+					if (Input.GetKeyUp(KeyCode.LeftShift) || Input.GetKeyUp(KeyCode.RightShift))
 					{
 						_tweens[2].Kill();
 						_tweens[3].Kill();
@@ -202,7 +202,7 @@ namespace Script
 						_tweens[3] = DOTween.To(
 							() => axleInfo.rightWheel.brakeTorque,
 							value => axleInfo.rightWheel.brakeTorque = value,
-							0.0f, .0f);
+							0.0f, .0f).OnComplete(() => Debug.Log("aaa"));
 					}
 				}
 

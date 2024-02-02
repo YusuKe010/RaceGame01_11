@@ -24,7 +24,7 @@ namespace Script
 
 		void Initialization()
 		{
-			_lapTimer = new float[_lapCount];
+			_lapTimer = new float[_lapCount + 1];
 			_timerText.enabled = true;
 			_lapText.enabled = false;
 		}
