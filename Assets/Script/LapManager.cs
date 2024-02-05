@@ -14,6 +14,7 @@ namespace Script
 		[SerializeField] private Text _nowLapText;
 		[SerializeField] private Text _timerText;
 		[SerializeField] private Ease _lapTimerFade;
+		[SerializeField] private Button _button;
 		private GameManager _gameManager;
 		private SplineAnimate _splineAnimate;
 		private float[] _lapTimer;
@@ -95,7 +96,7 @@ namespace Script
 
 		void Result()
 		{
-			
+			_button.onClick.AddListener(() => SceneChanger.Instance.LoadScene("Title"));
 		}
 	}
 }

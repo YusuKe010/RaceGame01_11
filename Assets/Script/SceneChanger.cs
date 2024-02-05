@@ -40,7 +40,7 @@ public class SceneChanger : MonoBehaviour
 
     public void LoadScene(string name)
     {
-        StartCoroutine( Execute(name));
+        StartCoroutine(Execute(name));
     }
 
     IEnumerator Execute(string name)
