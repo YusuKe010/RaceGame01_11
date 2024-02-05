@@ -4,8 +4,8 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using DG.Tweening;
-using UnityEditor.Callbacks;
 using UnityEngine.UI;
+using UniRx;
 
 public class SceneChanger : MonoBehaviour
 {
@@ -43,7 +43,7 @@ public class SceneChanger : MonoBehaviour
         StartCoroutine( Execute(name));
     }
 
-     IEnumerator Execute(string name)
+    IEnumerator Execute(string name)
     {
         yield return FadeOut();
         SceneManager.LoadScene(name);

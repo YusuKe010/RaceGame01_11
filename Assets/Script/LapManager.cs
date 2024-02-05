@@ -2,6 +2,8 @@
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
+using Unity.Mathematics;
+using UnityEngine.Splines;
 
 namespace Script
 {
@@ -9,15 +11,19 @@ namespace Script
 	{
 		[SerializeField] private int _lapCount = 3;
 		[SerializeField] private Text _lapText;
+		[SerializeField] private Text _nowLapText;
 		[SerializeField] private Text _timerText;
 		[SerializeField] private Ease _lapTimerFade;
 		private GameManager _gameManager;
+		private SplineAnimate _splineAnimate;
 		private float[] _lapTimer;
 		private float _raceTimer = 0;
 		private int _nowLapCount = 0;
+		private bool _isResult = false;
 
 		private void Start()
 		{
+			_splineAnimate = GetComponent<SplineAnimate>();
 			_gameManager = FindObjectOfType<GameManager>();
 			Initialization();
 		}
@@ -27,6 +33,7 @@ namespace Script
 			_lapTimer = new float[_lapCount + 1];
 			_timerText.enabled = true;
 			_lapText.enabled = false;
+			_isResult = false;
 		}
 
 		private void Update()
@@ -36,6 +43,7 @@ namespace Script
 				case GameMode.InGame:
 					_raceTimer += Time.deltaTime;
 					_timerText.text = "Timer:" + _raceTimer.ToString("f3");
+					if(_lapCount >= _nowLapCount)
 					_lapTimer[_nowLapCount] += Time.deltaTime;
 					break;
 			}
@@ -45,18 +53,26 @@ namespace Script
 		{
 			if (other.CompareTag("Lap"))
 			{
-				LapTimer();
-				_nowLapCount++;
-				if (_nowLapCount >= _lapCount)
+				if (_nowLapCount >= _lapCount && !_isResult)
 				{
-					GameManager.Instance._gameMode = GameMode.Ranking;
+					_isResult = true;
+					_splineAnimate.Play();
+					Result();
+					_nowLapText.enabled = false;
+					_gameManager._gameMode = GameMode.Ranking;
 				}
+				else if (_nowLapCount != 0 && _nowLapCount < _lapCount)
+				{
+					LapTimer();
+				}
+				_nowLapCount++;
+				_nowLapText.text = $"{_nowLapCount}/3Lap";
 			}
 		}
 
 		void LapTimer()
 		{
-			if (_lapText)
+			if (_lapText )
 			{
 				_lapText.enabled = true;
 				_lapText.text = "Lap : " + _lapTimer[_nowLapCount].ToString("f3");
@@ -75,6 +91,11 @@ namespace Script
 			{
 				Debug.Log("ラップテキストが割り当てられていない");
 			}
+		}
+
+		void Result()
+		{
+			
 		}
 	}
 }

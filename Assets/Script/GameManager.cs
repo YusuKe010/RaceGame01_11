@@ -20,11 +20,14 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance => _instance;
      [SerializeField]
      Text _cuontDownText = null;
+     [SerializeField] private AudioClip _audioClip;
     public GameMode _gameMode = GameMode.BeforeStart;
     private SceneChanger _sceneChanger = new SceneChanger();
+    private AudioSource _audioSource;
 
     void Start()
     {
+        _audioSource = GetComponent<AudioSource>();
         Initialization();
     }
 
@@ -54,6 +57,7 @@ public class GameManager : MonoBehaviour
     {
         await UniTask.Delay(TimeSpan.FromSeconds(waiteTime));
         _cuontDownText.enabled = true;
+        _audioSource.PlayOneShot(_audioClip);
         _cuontDownText.text = "3";
         await UniTask.Delay(TimeSpan.FromSeconds(1.0f));
         _cuontDownText.text = "2";

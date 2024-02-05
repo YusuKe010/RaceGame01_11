@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System;
 using DG.Tweening;
+using UnityEngine.Splines;
 
 namespace Script
 {
@@ -32,11 +33,12 @@ namespace Script
 		[SerializeField] private GameObject[] _muffler;
 		[SerializeField] private GameObject _grass;
 		[SerializeField] private CartStatus _cartStatus = CartStatus.Load;
+		[SerializeField] private Transform _startPos;
 		private GameManager _gameManager;
 		float _cartRotate = 0.0f;
 		float _rotationAccel = 360.0f;
-		private float _startDashTimer = 0;
-		[SerializeField] private float _maxStartDashTime = 10f;
+		private bool _isresult = false;
+		
 
 
 		const float MAX_SPEED = 40.0f;
@@ -53,7 +55,7 @@ namespace Script
 
 		void Initialization()
 		{
-			
+			this.transform.position = _startPos.position;
 			_muffler[0].SetActive(true);
 			_muffler[1].SetActive(true);
 			_grass.SetActive(false);
@@ -112,7 +114,11 @@ namespace Script
 
 		private void OnCollisionEnter(Collision other)
 		{
-			if (other.collider.CompareTag("Load"))
+		}
+
+		private void OnTriggerEnter(Collider other)
+		{
+			if (other.CompareTag("Load"))
 			{
 				Debug.Log("Load");
 				_cartStatus = CartStatus.Load; //CartStatus.Load
@@ -120,16 +126,12 @@ namespace Script
 				_muffler[1].SetActive(true);
 				_grass.SetActive(false);
 			}
-			if (other.collider.CompareTag("Grass"))
+			if (other.CompareTag("Grass"))
 			{
 				Debug.Log("Grass");
 				_cartStatus = CartStatus.Grass; //CartStatus.Grass
 				_grass.SetActive(true);
 			}
-		}
-
-		private void OnTriggerEnter(Collider other)
-		{
 		}
 
 		void Accel(float steering)
@@ -141,6 +143,11 @@ namespace Script
 					axleInfo.leftWheel.steerAngle = steering;
 					axleInfo.rightWheel.steerAngle = steering;
 				}
+
+				// if (_isLoad)
+				// {
+				// 	axleInfo.leftWheel.sidewaysFriction.stiffness = 2f;
+				// }
 
 				if (axleInfo.motor)
 				{
