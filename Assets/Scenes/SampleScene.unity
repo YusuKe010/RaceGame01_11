@@ -354,7 +354,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a6467e5bb1d8065479f1ea2835b19456, type: 2}
+  - {fileID: 2100000, guid: 30eb2d32c1e32a64bb1b2962978e6cfe, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -790,6 +790,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _cuontDownText: {fileID: 917277257}
+  _audioClip: {fileID: 0}
   _gameMode: 0
 --- !u!4 &1081718227
 Transform:

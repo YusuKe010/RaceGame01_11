@@ -1,4 +1,5 @@
 ﻿using System;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
@@ -13,6 +14,9 @@ namespace Script
 		[SerializeField] private Text _lapText;
 		[SerializeField] private Text _nowLapText;
 		[SerializeField] private Text _timerText;
+		[SerializeField] private Text _GoalText;
+		[SerializeField] private Text[] _lapTexts;
+		[SerializeField] private GameObject _Panel;
 		[SerializeField] private Ease _lapTimerFade;
 		[SerializeField] private Button _button;
 		private GameManager _gameManager;
@@ -27,6 +31,7 @@ namespace Script
 			_splineAnimate = GetComponent<SplineAnimate>();
 			_gameManager = FindObjectOfType<GameManager>();
 			Initialization();
+			Cursor.visible = false;
 		}
 
 		void Initialization()
@@ -35,6 +40,8 @@ namespace Script
 			_timerText.enabled = true;
 			_lapText.enabled = false;
 			_isResult = false;
+			_GoalText.enabled = false;
+			_Panel.SetActive(false);
 		}
 
 		private void Update()
@@ -94,9 +101,19 @@ namespace Script
 			}
 		}
 
-		void Result()
+		async void Result()
 		{
-			_button.onClick.AddListener(() => SceneChanger.Instance.LoadScene("Title"));
+			await UniTask.Delay(TimeSpan.FromSeconds(0f));
+			_button.onClick.AddListener(() =>SceneChanger.Instance.LoadScene("Title"));
+			Cursor.visible = true;
+			_GoalText.enabled = true;
+			await UniTask.Delay(TimeSpan.FromSeconds(3f));
+			_GoalText.enabled = false;
+			_Panel.SetActive(true);
+			_lapTexts[0].text = $"<color=#fff800>Lap1:</color>{(_lapTimer[1] + _lapTimer[0]).ToString("f2")}";
+			_lapTexts[1].text = $"<color=#fff800>Lap2:</color>{_lapTimer[2].ToString("f2")}";
+			_lapTexts[2].text = $"<color=#fff800>Lap3:</color>{_lapTimer[3].ToString("f2")}";
+			_lapTexts[3].text = $"<color=#fff800>TotalTimer:</color>{_raceTimer.ToString("f2")}";
 		}
 	}
 }

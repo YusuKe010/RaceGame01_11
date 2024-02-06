@@ -25,6 +25,11 @@ public class GameManager : MonoBehaviour
     private SceneChanger _sceneChanger = new SceneChanger();
     private AudioSource _audioSource;
 
+    private void Awake()
+    {
+        _instance = this;
+    }
+
     void Start()
     {
         _audioSource = GetComponent<AudioSource>();

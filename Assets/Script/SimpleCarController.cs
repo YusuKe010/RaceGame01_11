@@ -38,8 +38,8 @@ namespace Script
 		float _cartRotate = 0.0f;
 		float _rotationAccel = 360.0f;
 		private bool _isresult = false;
-		
 
+		WheelFrictionCurve _wheelFrictionCurve = new WheelFrictionCurve();
 
 		const float MAX_SPEED = 40.0f;
 		const float MAX_ROTATION_SPEED = 360.0f / 5f;
@@ -63,6 +63,7 @@ namespace Script
 			{
 				axleInfo.leftWheel.brakeTorque = .0f;
 				axleInfo.rightWheel.brakeTorque = .0f;
+				_wheelFrictionCurve = axleInfo.leftWheel.sidewaysFriction;
 			}
 		}
 
@@ -70,13 +71,13 @@ namespace Script
 		{
 			float steering = maxSteeringAngle * Input.GetAxis("Horizontal");
 
-			 switch (_gameManager._gameMode)
+			switch (_gameManager._gameMode)
 			{
 				case GameMode.BeforeStart:
-			 		break;
+					break;
 				case GameMode.InGame:
 					Accel(steering);
-			 		Carb(steering);
+					Carb(steering);
 					switch (_cartStatus)
 					{
 						case CartStatus.Load:
@@ -126,6 +127,7 @@ namespace Script
 				_muffler[1].SetActive(true);
 				_grass.SetActive(false);
 			}
+
 			if (other.CompareTag("Grass"))
 			{
 				Debug.Log("Grass");
@@ -144,10 +146,17 @@ namespace Script
 					axleInfo.rightWheel.steerAngle = steering;
 				}
 
-				// if (_isLoad)
-				// {
-				// 	axleInfo.leftWheel.sidewaysFriction.stiffness = 2f;
-				// }
+				if (_cartStatus == CartStatus.Grass)
+				{
+					axleInfo.leftWheel.sidewaysFriction = new WheelFrictionCurve(){stiffness = .5f};
+					axleInfo.rightWheel.sidewaysFriction = new WheelFrictionCurve(){stiffness = .5f};
+				}
+				else
+				{
+					axleInfo.leftWheel.sidewaysFriction = _wheelFrictionCurve;
+					axleInfo.rightWheel.sidewaysFriction = _wheelFrictionCurve;
+				}
+
 
 				if (axleInfo.motor)
 				{
@@ -163,25 +172,25 @@ namespace Script
 						// 	() => axleInfo.rightWheel.motorTorque,
 						// 	value => axleInfo.rightWheel.motorTorque = value,
 						// 	maxMotorTorque, 1.0f).SetEase(Ease.OutQuad);
-					axleInfo.leftWheel.motorTorque = maxMotorTorque;
-					axleInfo.rightWheel.motorTorque = maxMotorTorque;
+						axleInfo.leftWheel.motorTorque = maxMotorTorque;
+						axleInfo.rightWheel.motorTorque = maxMotorTorque;
 					}
 
 					if (Input.GetKeyUp(KeyCode.W) || Input.GetKeyUp(KeyCode.UpArrow))
 					{
-					// 	_tweens[0].Kill();
-					// 	_tweens[1].Kill();
-					// 	_tweens[0] = DOTween.To(
-					// 		() => axleInfo.leftWheel.motorTorque,
-					// 		value => axleInfo.leftWheel.motorTorque = value,
-					// 		0, 1.5f);
-					// 	_tweens[1] = DOTween.To(
-					// 		() => axleInfo.rightWheel.motorTorque,
-					// 		value => axleInfo.rightWheel.motorTorque = value,
-					// 		0, 1.5f);
-					
-					axleInfo.leftWheel.motorTorque = 0;
-					axleInfo.rightWheel.motorTorque = 0;
+						// 	_tweens[0].Kill();
+						// 	_tweens[1].Kill();
+						// 	_tweens[0] = DOTween.To(
+						// 		() => axleInfo.leftWheel.motorTorque,
+						// 		value => axleInfo.leftWheel.motorTorque = value,
+						// 		0, 1.5f);
+						// 	_tweens[1] = DOTween.To(
+						// 		() => axleInfo.rightWheel.motorTorque,
+						// 		value => axleInfo.rightWheel.motorTorque = value,
+						// 		0, 1.5f);
+
+						axleInfo.leftWheel.motorTorque = 0;
+						axleInfo.rightWheel.motorTorque = 0;
 					}
 
 					if (Input.GetKeyDown(KeyCode.LeftShift) || Input.GetKeyDown(KeyCode.RightShift))
@@ -195,7 +204,7 @@ namespace Script
 						_tweens[3] = DOTween.To(
 							() => axleInfo.rightWheel.brakeTorque,
 							value => axleInfo.rightWheel.brakeTorque = value,
-							_maxCartBrake , 0.0f);
+							_maxCartBrake, 0.0f);
 					}
 
 					if (Input.GetKeyUp(KeyCode.LeftShift) || Input.GetKeyUp(KeyCode.RightShift))
@@ -224,6 +233,7 @@ namespace Script
 			{
 				_cartRotateSpeed *= 0.9f;
 			}
+
 
 			_cartRotateSpeed += _rotationAccel * steering * Time.deltaTime;
 			_cartRotateSpeed = Mathf.Clamp(_cartRotateSpeed, -MAX_ROTATION_SPEED, MAX_ROTATION_SPEED);
