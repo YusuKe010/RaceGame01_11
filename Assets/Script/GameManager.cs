@@ -5,6 +5,7 @@ using UnityEngine;
 using Cysharp.Threading.Tasks;
 using Unity.VisualScripting;
 using UnityEngine.Serialization;
+using UnityEngine.Splines;
 using UnityEngine.UI;
 
 public enum GameMode
